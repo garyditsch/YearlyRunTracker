@@ -423,6 +423,7 @@
                 .attr("fill", d => colorFn(d.value))
                 .append("title")
                     .text(d => `${formatDate(d.date)}: ${d.value.toFixed(2)}`);
+                    
         }
 
         async function bubble(theData, svg, ...Args){
