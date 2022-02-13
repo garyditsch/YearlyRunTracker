@@ -29,7 +29,9 @@ const runDateValues = async (data) => data.map(dv => ({
 
 const theData = async (startDate, endDate) => {
     try {
+        let beforeTime = Date.now()
         const data = await getRunData(running_csv)
+        let afterTime = Date.now()
         const parsedData = d3.csvParse(data);
         const dates = await runDateValues(parsedData)
         // console.log(dates)
@@ -40,7 +42,8 @@ const theData = async (startDate, endDate) => {
             var time = new Date(d.date).getTime();
             return (sd < time && time < ed);
         });
-        console.log(result)
+        console.log('data load ok executed in', (afterTime - beforeTime) / 1000)
+        // console.log(result)
         return result
     } catch (err) {
         console.log('the data function error', err)
