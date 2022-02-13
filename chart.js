@@ -216,7 +216,7 @@
             const endDate = new Date(Args[0].endDate).getTime()
 
             const dates = await theData(startDate, endDate)
-            console.log(dates)
+            // console.log(dates)
 
             const yearTotal = dates.reduce((runTotal, run) => {
                 const total = runTotal + run.value
@@ -348,7 +348,7 @@
                 .attr("font-size", 10)
                 .text(formatDay);
 
-            console.log(yearData)
+            // console.log(yearData)
             // add year totals
             svg
                 .append("text")
