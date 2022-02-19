@@ -1,9 +1,8 @@
 // Fetch the data from the csv file
-const getRunData = async (url) => {
+const getRunData = async (url, offset) => {
     try {
-        const response = await fetch(url);
-        const data = await response.text();
-        return data
+        const res = await fetch(url);
+        return res.json()
     } catch (err) {
         console.log('get data error', err)
     } finally {
@@ -11,9 +10,9 @@ const getRunData = async (url) => {
     }
 }
 
-// Where I save the csv data
-const running_csv = "https://gist.githubusercontent.com/garyditsch/32a199bea63e2f51ca3fc850f3b5914f/raw/strava_all_activities.csv"
+// const runTable = "http://localhost:8888/api/get-run-data"
 
+const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data"
 
 // map over the data and return a new array with just the formatted date and distance of the commute
 // this format was utilized by the example I worked from would like to improve with additional data
@@ -21,21 +20,21 @@ const running_csv = "https://gist.githubusercontent.com/garyditsch/32a199bea63e2
 // TODO: bring in other data for additional data sources
 const runDateValues = async (data) => data.map(dv => ({
     date: d3.timeDay(new Date(dv['Activity Date'])),
-    value: (Number(dv['Distance']) * 0.6213712)/1000,
+    value: (Number(dv['Distance']) * 0.6213712),
     minutesOfDayStart: (((new Date(dv['Activity Date']).getHours() * 60) + (new Date(dv['Activity Date']).getMinutes()) - new Date(dv['Activity Date']).getTimezoneOffset()) / 60 ),
     speed: 60 / (dv["Average Speed"] * 2.2369),
     dv: dv,
 }));
 
+
 const theData = async (startDate, endDate) => {
     try {
         let beforeTime = Date.now()
-        const data = await getRunData(running_csv)
+        const data = await getRunData(runTable)
         let afterTime = Date.now()
-        const parsedData = d3.csvParse(data);
-        const dates = await runDateValues(parsedData)
-        // console.log(dates)
-
+        
+        const dates = await runDateValues(data)
+        
         ed = new Date(endDate).getTime(),
         sd = new Date(startDate).getTime(),
         result = dates.filter(d => {
@@ -43,7 +42,8 @@ const theData = async (startDate, endDate) => {
             return (sd < time && time < ed);
         });
         console.log('data load ok executed in', (afterTime - beforeTime) / 1000)
-        // console.log(result)
+        
+        console.log(result)
         return result
     } catch (err) {
         console.log('the data function error', err)

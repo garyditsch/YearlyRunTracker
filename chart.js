@@ -216,18 +216,22 @@
             const endDate = new Date(Args[0].endDate).getTime()
 
             const dates = await theData(startDate, endDate)
-            // console.log(dates)
+            console.log(dates)
 
             const yearTotal = dates.reduce((runTotal, run) => {
+                console.log(run)
                 const total = runTotal + run.value
                 return total;
             }, 0)
 
+
+            // console.log(dates[0])
             const yearData = {
                 'total': yearTotal.toFixed(0), 
                 'calYear': dates[0].date.getFullYear(), 
                 'noRuns': dates.length
             }
+            console.log('Year Data', yearData)
 
             // function to return week label
             const formatDay = d =>
