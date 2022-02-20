@@ -17,7 +17,8 @@ RunCharts.drawCalendar(theData, calendar_svg_2022, {
         right: 10,
         top: 100,
         bottom: 10
-    }
+    }, 
+    'class': 'spinner1'
 });
 
 RunCharts.drawCalendar(theData, calendar_svg_2021, {
@@ -30,7 +31,8 @@ RunCharts.drawCalendar(theData, calendar_svg_2021, {
         right: 10,
         top: 100,
         bottom: 10
-    }
+    }, 
+    'class': 'spinner2'
 });
 
 RunCharts.drawCalendar(theData, calendar_svg_2020, {
@@ -43,7 +45,8 @@ RunCharts.drawCalendar(theData, calendar_svg_2020, {
         right: 10,
         top: 100,
         bottom: 10
-    }
+    },
+    'class': 'spinner3'
 });
 
 // RunCharts.drawCalendar(theData, calendar_svg_2019, {

@@ -211,19 +211,32 @@
         }
 
         async function calendar(theData, svg, ...Args){
+            // hide an element
+            const hide = (elem) => {
+                elem.classList.add('hidden');
+            }
 
             const startDate = new Date(Args[0].startDate).getTime()
             const endDate = new Date(Args[0].endDate).getTime()
+            const element = Args[0].class
+            console.log(element)
 
-            const dates = await theData(startDate, endDate)
-            console.log(dates)
+            let ed = new Date(endDate).getTime()
+            let sd = new Date(startDate).getTime()
+
+            let allMyDates = await theData(startDate, endDate)
+            hide(document.querySelector(`.${element}`));
+
+            let dates = allMyDates.filter(d => {
+                var time = new Date(d.date).getTime();
+                return (sd < time && time < ed);
+            });
 
             const yearTotal = dates.reduce((runTotal, run) => {
-                console.log(run)
+                // console.log(run)
                 const total = runTotal + run.value
                 return total;
             }, 0)
-
 
             // console.log(dates[0])
             const yearData = {

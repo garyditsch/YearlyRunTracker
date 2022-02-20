@@ -27,24 +27,17 @@ const runDateValues = async (data) => data.map(dv => ({
 }));
 
 
-const theData = async (startDate, endDate) => {
+const theData = async () => {
     try {
         let beforeTime = Date.now()
         const data = await getRunData(runTable)
         let afterTime = Date.now()
         
         const dates = await runDateValues(data)
-        
-        ed = new Date(endDate).getTime(),
-        sd = new Date(startDate).getTime(),
-        result = dates.filter(d => {
-            var time = new Date(d.date).getTime();
-            return (sd < time && time < ed);
-        });
+
         console.log('data load ok executed in', (afterTime - beforeTime) / 1000)
         
-        console.log(result)
-        return result
+        return dates
     } catch (err) {
         console.log('the data function error', err)
     } finally {
