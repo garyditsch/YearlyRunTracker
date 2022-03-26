@@ -1,10 +1,9 @@
- async function calendar(theData, svg, ...Args){
+async function calendar(theData, svg, ...Args){
     // hide an element
 
     const startDate = new Date(Args[0].startDate).getTime()
     const endDate = new Date(Args[0].endDate).getTime()
     const element = Args[0].class || 'no class'
-    console.log(element)
 
     const hide = (elem) => {
         elem.classList.add('hidden');
@@ -12,9 +11,6 @@
 
     let ed = new Date(endDate).getTime()
     let sd = new Date(startDate).getTime()
-
-    console.log(ed)
-    console.log(sd)
 
     let allMyDates = await theData(startDate, endDate)
 
@@ -28,12 +24,10 @@
     });
 
     const yearTotal = dates.reduce((runTotal, run) => {
-        // console.log(run)
         const total = runTotal + run.value
         return total;
     }, 0)
 
-    console.log(dates)
     const yearData = {
         'total': yearTotal.toFixed(0), 
         'calYear': dates[0].date.getFullYear(), 
@@ -149,7 +143,6 @@
     const formatDate = d3.utcFormat("%x");
 
     console.log(svg)
-
     // adds day of the week
     svg.append('g')
         .attr("text-anchor", "end")
@@ -162,7 +155,6 @@
         .attr("font-size", 10)
         .text(formatDay);
 
-    // console.log(yearData)
     // add year totals
     svg
         .append("text")
@@ -236,7 +228,7 @@
         .attr("y", d => (countDay(d.date) * cellSize + 0.5) + 50)
         .attr("fill", d => colorFn(d.value))
         .append("title")
-            .text(d => `${formatDate(d.date)}: ${d.value.toFixed(2)}`);
-            
+            .text(d => `${formatDate(d.date)}: ${d.value.toFixed(2)}`);        
 }
 
+export { calendar };
