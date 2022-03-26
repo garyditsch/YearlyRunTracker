@@ -212,20 +212,27 @@
 
         async function calendar(theData, svg, ...Args){
             // hide an element
+
+            const startDate = new Date(Args[0].startDate).getTime()
+            const endDate = new Date(Args[0].endDate).getTime()
+            const element = Args[0].class || 'no class'
+            console.log(element)
+
             const hide = (elem) => {
                 elem.classList.add('hidden');
             }
 
-            const startDate = new Date(Args[0].startDate).getTime()
-            const endDate = new Date(Args[0].endDate).getTime()
-            const element = Args[0].class
-            console.log(element)
-
             let ed = new Date(endDate).getTime()
             let sd = new Date(startDate).getTime()
 
+            console.log(ed)
+            console.log(sd)
+
             let allMyDates = await theData(startDate, endDate)
-            hide(document.querySelector(`.${element}`));
+
+            if(element != 'no class'){
+                hide(document.querySelector(`.${element}`));
+            }
 
             let dates = allMyDates.filter(d => {
                 var time = new Date(d.date).getTime();
@@ -238,7 +245,7 @@
                 return total;
             }, 0)
 
-            // console.log(dates[0])
+            console.log(dates)
             const yearData = {
                 'total': yearTotal.toFixed(0), 
                 'calYear': dates[0].date.getFullYear(), 
@@ -352,6 +359,8 @@
             // returns array of all the sundays from a start/end date
             const timeWeek = d3.utcSunday;
             const formatDate = d3.utcFormat("%x");
+
+            console.log(svg)
 
             // adds day of the week
             svg.append('g')

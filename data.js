@@ -44,3 +44,35 @@ const theData = async () => {
         console.log('done with the data function')
     }
 }
+
+const myFunction = () => {
+    RunCharts.drawCalendar(theData, calendar_svg_2019, {
+        'startDate': '1/1/2020',
+        'endDate': '12/31/2020',
+        'height': 500,
+        'width': 900,
+        'margin': {
+            left: 0,
+            right: 10,
+            top: 100,
+            bottom: 10
+        }
+    });
+}
+
+
+// const get2019 = () => {
+//     console.log('this is my function')
+//     RunCharts.drawCalendar(theData, calendar_svg_2019, {
+//         'startDate': '1/1/2019',
+//         'endDate': '12/31/2019',
+//         'height': 500,
+//         'width': 900,
+//         'margin': {
+//             left: 0,
+//             right: 10,
+//             top: 100,
+//             bottom: 10
+//         }
+//     });
+// }
