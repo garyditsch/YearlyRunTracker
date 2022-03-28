@@ -10,10 +10,6 @@ const getRunData = async (url, offset) => {
     }
 }
 
-// const runTable = "http://localhost:8888/api/get-run-data"
-
-const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data"
-
 // map over the data and return a new array with just the formatted date and distance of the commute
 // this format was utilized by the example I worked from would like to improve with additional data
 // convert from km to miles
@@ -27,15 +23,13 @@ const runDateValues = async (data) => data.map(dv => ({
 }));
 
 
-const theData = async () => {
+const theData = async (table) => {
     try {
         let beforeTime = Date.now()
-        const data = await getRunData(runTable)
+        const data = await getRunData(table)
         let afterTime = Date.now()
         
         const dates = await runDateValues(data)
-
-        console.log('data load ok executed in', (afterTime - beforeTime) / 1000)
         
         return dates
     } catch (err) {
@@ -45,17 +39,40 @@ const theData = async () => {
     }
 }
 
-function myFunction(theData, calendar_svg_2019) {
-    calendar(theData, calendar_svg_2019, {
-        'startDate': '1/1/2020',
-        'endDate': '12/31/2020',
-        'height': 500,
-        'width': 900,
-        'margin': {
-            left: 0,
-            right: 10,
-            top: 100,
-            bottom: 10
-        }
-    });
+const groupedMonthlyData = async (table1, table2) => {
+    try {
+        let beforeTime = Date.now()
+        const data = await getRunData(table1)
+        const data2 = await getRunData(table2)
+        let afterTime = Date.now()
+
+        const data3 = [...data, ...data2]
+        const dates = await runDateValues(data3)
+
+        const months = d3.nest()
+            .key(d => d.date.toLocaleString('default', { month: 'long', year: 'numeric' }))
+            .entries(dates)
+
+        const monthTotals = months.map((month) => {
+            const subTotal = month.values.reduce((total, num) => { 
+                return total + num.value              
+            }, 0)
+            return {
+                key: month.key,
+                distance: parseInt(subTotal)
+            }
+        })
+
+        const sortedMonthTotal = monthTotals.sort((a, b) => {
+            return b.distance - a.distance
+        })        
+        return sortedMonthTotal
+    } catch (err) {
+        console.log('the data function error', err)
+    } finally {
+        console.log('done with the data function')
+    }
 }
+
+
+

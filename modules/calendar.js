@@ -1,4 +1,4 @@
-async function calendar(theData, svg, ...Args){
+async function calendar(theData, table, svg, ...Args){
     // hide an element
 
     const startDate = new Date(Args[0].startDate).getTime()
@@ -12,7 +12,7 @@ async function calendar(theData, svg, ...Args){
     let ed = new Date(endDate).getTime()
     let sd = new Date(startDate).getTime()
 
-    let allMyDates = await theData(startDate, endDate)
+    let allMyDates = await theData(table)
 
     if(element != 'no class'){
         hide(document.querySelector(`.${element}`));
@@ -33,7 +33,6 @@ async function calendar(theData, svg, ...Args){
         'calYear': dates[0].date.getFullYear(), 
         'noRuns': dates.length
     }
-    console.log('Year Data', yearData)
 
     // function to return week label
     const formatDay = d =>
@@ -142,7 +141,6 @@ async function calendar(theData, svg, ...Args){
     const timeWeek = d3.utcSunday;
     const formatDate = d3.utcFormat("%x");
 
-    console.log(svg)
     // adds day of the week
     svg.append('g')
         .attr("text-anchor", "end")
