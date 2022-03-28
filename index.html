@@ -7,10 +7,13 @@
     <title>Year's Running Review</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-color/1.2.1/d3-color.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-color/1.2.1/d3-color.js">
+    </script><script type="text/javascript" src="data.js"></script>
+    <script src="main.js" type="module"></script>
+
 </head>
 <body style="margin: 0">
-    <div style="display: grid; grid-template-columns: auto; justify-content: center; background-color: white; margin-top: 4rem;">
+    <div style="display: grid; grid-template-columns: auto; background-color: white; margin: 4rem;">
         <!-- <h1>My Yearly Running Reviews</h1> -->
         <div>
             <div class="spinner1"><img src="./progress.gif" /></div>
@@ -24,17 +27,19 @@
             <div class="spinner3"><img src="./progress.gif" /></div>
             <svg id="calendar_svg_2020" width="900" height="175"></svg>
         </div>
-        <!-- <div>
+        <div>
+            <div class="spinner3"><button id="button_2019">More</button></div>
             <svg id="calendar_svg_2019" width="900" height="175"></svg>
         </div>
         <div>
+            <div class="spinner3"><button id="button_2018">More</button></div>
             <svg id="calendar_svg_2018" width="900" height="175"></svg>
         </div>
         <div>
+            <div class="spinner3"><button id="button_2017">More</button></div>
             <svg id="calendar_svg_2017" width="900" height="175"></svg>
-        </div> -->
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;" id="monthlyReview"></div>
     </div>
-    <script src="data.js"></script>
-    <script src="main.js" type="module"></script>
 </body>
 </html>

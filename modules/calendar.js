@@ -1,4 +1,4 @@
- async function calendar(theData, svg, ...Args){
+async function calendar(theData, table, svg, ...Args){
     // hide an element
 
     const startDate = new Date(Args[0].startDate).getTime()
@@ -12,7 +12,7 @@
     let ed = new Date(endDate).getTime()
     let sd = new Date(startDate).getTime()
 
-    let allMyDates = await theData(startDate, endDate)
+    let allMyDates = await theData(table)
 
     if(element != 'no class'){
         hide(document.querySelector(`.${element}`));
@@ -152,7 +152,7 @@
         .attr("dy", "0.31em")
         .attr("font-size", 10)
         .text(formatDay);
-        
+
     // add year totals
     svg
         .append("text")
@@ -226,7 +226,7 @@
         .attr("y", d => (countDay(d.date) * cellSize + 0.5) + 50)
         .attr("fill", d => colorFn(d.value))
         .append("title")
-            .text(d => `${formatDate(d.date)}: ${d.value.toFixed(2)}`);
-            
+            .text(d => `${formatDate(d.date)}: ${d.value.toFixed(2)}`);        
 }
 
+export { calendar };
