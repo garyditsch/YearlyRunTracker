@@ -1,3 +1,16 @@
 .hidden {
     display: none;
 }
+
+h1 {
+    color: rgb(9, 70, 139);
+    margin: 0px;
+    text-align: center;
+}
+
+
+h3 {
+    color: rgb(9, 70, 139);
+    margin: 0rem 0rem 1rem 0rem;
+    text-align: center;
+}

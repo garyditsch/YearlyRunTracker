@@ -55,13 +55,130 @@ calendar(theData, runTable, calendar_svg_2020, {
     'class': 'spinner3'
 });
 
-const getMonthlyGroupedData = async (runTable, runTable2) => {
-    const result = await groupedMonthlyData(runTable, runTable2)
-    const monthly = document.getElementById('monthlyReview')
-    const list = result.map((month) => {
-        return `<div>${month.key}:  ${month.distance}</div>`
-    })
-    monthly.innerHTML = list.join('')
+const getMonthlyGroupedData = async (runTable, runTable2, isSorted) => {
+    const result = await groupedMonthlyData(runTable, runTable2, isSorted)
+    const monthValues = await result.map((x) => {return x.distance})
+    const monthLabels = await result.map((x) => {return x.key})
+    const monthRunCount = await result.map((x) => {return x.runCount})
+    return {
+        'monthLabels': monthLabels,
+        'monthValues': monthValues,
+        'monthRunCount': monthRunCount
+    }
 }
 
-getMonthlyGroupedData(runTable, runTable2)
+getMonthlyGroupedData(runTable, runTable2, true)
+    .then(response => {
+        const data = {
+            labels: response.monthLabels,
+            datasets: [{
+                label: 'Miles',
+                backgroundColor: 'rgb(140, 192, 221)',
+                borderColor: 'rgb(140, 192, 221)',
+                data: response.monthValues,
+            }]
+        }
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
+              }
+          };
+        const myChart = new Chart(
+        document.getElementById('myChart'),
+        config
+        );
+    })
+    .catch(err => console.log(err))
+
+getMonthlyGroupedData(runTable, runTable2, false)
+    .then(response => {
+        const data = {
+            labels: response.monthLabels,
+            datasets: [{
+                label: 'Miles',
+                backgroundColor: 'rgb(140, 192, 221)',
+                borderColor: 'rgb(140, 192, 221)',
+                data: response.monthValues,
+            }]
+        }
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
+              }
+          };
+        const myChart = new Chart(
+        document.getElementById('dateMonthlyChart'),
+        config
+        );
+    })
+    .catch(err => console.log(err))
+
+getMonthlyGroupedData(runTable, runTable2, false)
+    .then(response => {
+        const data = {
+            labels: response.monthLabels,
+            datasets: [{
+                label: 'Run Count',
+                backgroundColor: 'rgb(140, 192, 221)',
+                borderColor: 'rgb(140, 192, 221)',
+                data: response.monthRunCount,
+            }]
+        }
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
+              }
+          };
+        const myChart = new Chart(
+        document.getElementById('runCountDateMonthlyChart'),
+        config
+        );
+    })
+    .catch(err => console.log(err))
+
+getMonthlyGroupedData(runTable, runTable2, true)
+    .then(response => {
+        const data = {
+            labels: response.monthLabels,
+            datasets: [{
+                label: 'Run Count',
+                backgroundColor: 'rgb(140, 192, 221)',
+                borderColor: 'rgb(140, 192, 221)',
+                data: response.monthRunCount,
+            }]
+        }
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                }
+              }
+          };
+        const myChart = new Chart(
+        document.getElementById('runCountHighToLow'),
+        config
+        );
+    })
+    .catch(err => console.log(err))

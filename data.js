@@ -39,7 +39,7 @@ const theData = async (table) => {
     }
 }
 
-const groupedMonthlyData = async (table1, table2) => {
+const groupedMonthlyData = async (table1, table2, sorted = true) => {
     try {
         let beforeTime = Date.now()
         const data = await getRunData(table1)
@@ -49,9 +49,13 @@ const groupedMonthlyData = async (table1, table2) => {
         const data3 = [...data, ...data2]
         const dates = await runDateValues(data3)
 
+        const datesInOrder = dates.sort((a,b) => {
+            return a.date - b.date
+        })
+
         const months = d3.nest()
             .key(d => d.date.toLocaleString('default', { month: 'long', year: 'numeric' }))
-            .entries(dates)
+            .entries(datesInOrder)
 
         const monthTotals = months.map((month) => {
             const subTotal = month.values.reduce((total, num) => { 
@@ -59,14 +63,19 @@ const groupedMonthlyData = async (table1, table2) => {
             }, 0)
             return {
                 key: month.key,
-                distance: parseInt(subTotal)
+                distance: parseInt(subTotal),
+                runCount: month.values.length
             }
         })
-
-        const sortedMonthTotal = monthTotals.sort((a, b) => {
-            return b.distance - a.distance
-        })        
-        return sortedMonthTotal
+        if( sorted === true){
+            const sortedMonthTotal = monthTotals.sort((a, b) => {
+                return b.distance - a.distance
+            })
+            console.log(sortedMonthTotal)        
+            return sortedMonthTotal
+        }
+        console.log(monthTotals)
+        return monthTotals        
     } catch (err) {
         console.log('the data function error', err)
     } finally {
