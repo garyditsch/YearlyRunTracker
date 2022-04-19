@@ -1,0 +1,26 @@
+{
+  "name": "yearlyruntracker",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "parcel": "latest"
+  },
+  "dependencies": {
+    "date-fns": "^2.28.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garyditsch/YearlyRunTracker.git"
+  },
+  "author": "Gary Ditsch",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/garyditsch/YearlyRunTracker/issues"
+  },
+  "homepage": "https://github.com/garyditsch/YearlyRunTracker#readme"
+}
