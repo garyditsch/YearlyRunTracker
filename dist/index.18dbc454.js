@@ -516,52 +516,99 @@ function hmrAcceptRun(bundle, id) {
 },{}],"1SICI":[function(require,module,exports) {
 var _calendarJs = require("./modules/calendar.js");
 var _helpersJs = require("./modules/helpers.js");
-const calendar_svg_2022 = d3.select("#calendar_svg_2022");
-const calendar_svg_2021 = d3.select("#calendar_svg_2021");
-const calendar_svg_2020 = d3.select("#calendar_svg_2020");
-document.querySelector('#button_2019').addEventListener('click', _helpersJs.drawCalendar2019);
-document.querySelector('#button_2018').addEventListener('click', _helpersJs.drawCalendar2018);
-document.querySelector('#button_2017').addEventListener('click', _helpersJs.drawCalendar2017);
+const calendar_svg = d3.select("#calendar_svg_2022");
 const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data";
 const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
-_calendarJs.calendar(theData, runTable, calendar_svg_2022, {
-    'startDate': '12/31/2021',
-    'endDate': '1/1/2023',
-    'height': 500,
-    'width': 900,
-    'margin': {
-        left: 0,
-        right: 10,
-        top: 100,
-        bottom: 10
-    },
-    'class': 'spinner1'
-}); // calendar(theData, runTable, calendar_svg_2021, {
- //     'startDate': '12/31/2020',
- //     'endDate': '1/1/2022',
- //     'height': 500,
- //     'width': 900,
- //     'margin': {
- //         left: 0,
- //         right: 10,
- //         top: 100,
- //         bottom: 10
- //     }, 
- //     'class': 'spinner2'
- // });
- // calendar(theData, runTable, calendar_svg_2020, {
- //     'startDate': '12/31/2019',
- //     'endDate': '1/1/2021',
- //     'height': 500,‰
- //     'width': 900,
- //     'margin': {
- //         left: 0,
- //         right: 10,
- //         top: 100,
- //         bottom: 10
- //     },
- //     'class': 'spinner3'
- // });
+let dateControl = document.querySelector('select');
+dateControl.addEventListener('change', async ()=>{
+    console.log(dateControl.value);
+    switch(dateControl.value){
+        case '2022':
+            _calendarJs.calendar(theData, runTable, calendar_svg, {
+                'startDate': '12/31/2021',
+                'endDate': '1/1/2023',
+                'height': 500,
+                'width': 900,
+                'margin': {
+                    left: 0,
+                    right: 10,
+                    top: 100,
+                    bottom: 10
+                }
+            });
+            break;
+        case '2021':
+            _calendarJs.calendar(theData, runTable, calendar_svg, {
+                'startDate': '12/31/2020',
+                'endDate': '1/1/2022',
+                'height': 500,
+                'width': 900,
+                'margin': {
+                    left: 0,
+                    right: 10,
+                    top: 100,
+                    bottom: 10
+                }
+            });
+            break;
+        case '2020':
+            _calendarJs.calendar(theData, runTable, calendar_svg, {
+                'startDate': '12/31/2019',
+                'endDate': '1/1/2021',
+                'height': 500,
+                'width': 900,
+                'margin': {
+                    left: 0,
+                    right: 10,
+                    top: 100,
+                    bottom: 10
+                }
+            });
+            break;
+        case '2019':
+            _calendarJs.calendar(theData, runTable2, calendar_svg, {
+                'startDate': '12/31/2018',
+                'endDate': '1/1/2020',
+                'height': 500,
+                'width': 900,
+                'margin': {
+                    left: 0,
+                    right: 10,
+                    top: 100,
+                    bottom: 10
+                }
+            });
+            break;
+        case '2018':
+            _calendarJs.calendar(theData, runTable2, calendar_svg, {
+                'startDate': '12/31/2017',
+                'endDate': '1/1/2019',
+                'height': 500,
+                'width': 900,
+                'margin': {
+                    left: 0,
+                    right: 10,
+                    top: 100,
+                    bottom: 10
+                }
+            });
+            break;
+        case '2017':
+            _calendarJs.calendar(theData, runTable2, calendar_svg, {
+                'startDate': '12/31/2016',
+                'endDate': '1/1/2018',
+                'height': 500,
+                'width': 900,
+                'margin': {
+                    left: 0,
+                    right: 10,
+                    top: 100,
+                    bottom: 10
+                }
+            });
+            break;
+    }
+});
 
 },{"./modules/calendar.js":"91nXN","./modules/helpers.js":"eCTLq"}],"91nXN":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -569,18 +616,13 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "calendar", ()=>calendar
 );
 async function calendar(theData, table, svg, ...Args) {
-    // hide an element
     const startDate = new Date(Args[0].startDate).getTime();
     const endDate = new Date(Args[0].endDate).getTime();
-    const element = Args[0].class || 'no class';
-    const hide = (elem)=>{
-        elem.classList.add('hidden');
-    };
+    svg.selectAll("*").remove();
     let ed = new Date(endDate).getTime();
     let sd = new Date(startDate).getTime();
     let allMyDates = await theData(table);
     console.log(allMyDates);
-    if (element != 'no class') hide(document.querySelector(`.${element}`));
     let dates = allMyDates.filter((d)=>{
         var time = new Date(d.date).getTime();
         return sd < time && time < ed;
