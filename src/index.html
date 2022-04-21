@@ -18,29 +18,20 @@
     <a href="./weekly.html">Weekly View</a>
     <div style="display: grid; grid-template-columns: auto; background-color: white; margin: 4rem;">
         <h1>My Yearly Running Reviews</h1>
+        <div style="width: 50%; margin-bottom: 3rem;">
+            <label for="years">Select the Year</label>
+            <select name="years" id="years" form="runYear">
+                <option value="">Choose a Year</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
+                <option value="2019">2019</option>
+                <option value="2018">2018</option>
+                <option value="2017">2017</option>
+            </select>
+        </div>
         <div>
-            <div class="spinner1"><img src="./assets/progress.gif" /></div>
             <svg id="calendar_svg_2022" width="900" height="175"></svg>
-        </div>
-        <div>
-            <!-- <div class="spinner2"><img src="./assets/progress.gif" /></div> -->
-            <svg id="calendar_svg_2021" width="900" height="175"></svg>
-        </div>
-        <div>
-            <!-- <div class="spinner3"><img src="./assets/progress.gif" /></div> -->
-            <svg id="calendar_svg_2020" width="900" height="175"></svg>
-        </div>
-        <div>
-            <div class="spinner3"><button id="button_2019">More</button></div>
-            <svg id="calendar_svg_2019" width="900" height="175"></svg>
-        </div>
-        <div>
-            <div class="spinner3"><button id="button_2018">More</button></div>
-            <svg id="calendar_svg_2018" width="900" height="175"></svg>
-        </div>
-        <div>
-            <div class="spinner3"><button id="button_2017">More</button></div>
-            <svg id="calendar_svg_2017" width="900" height="175"></svg>
         </div>
     </div>
 </body>

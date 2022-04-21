@@ -1,23 +1,15 @@
 async function calendar(theData, table, svg, ...Args){
-    // hide an element
 
     const startDate = new Date(Args[0].startDate).getTime()
     const endDate = new Date(Args[0].endDate).getTime()
-    const element = Args[0].class || 'no class'
 
-    const hide = (elem) => {
-        elem.classList.add('hidden');
-    }
+    svg.selectAll("*").remove()
 
     let ed = new Date(endDate).getTime()
     let sd = new Date(startDate).getTime()
 
     let allMyDates = await theData(table)
     console.log(allMyDates)
-
-    if(element != 'no class'){
-        hide(document.querySelector(`.${element}`));
-    }
 
     let dates = allMyDates.filter(d => {
         var time = new Date(d.date).getTime();
