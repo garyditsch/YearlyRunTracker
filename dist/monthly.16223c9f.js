@@ -1,3 +1,5 @@
+// const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data"
+// const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data"
 // Fetch the data from the csv file
 const getRunData = async (url, offset)=>{
     try {
@@ -82,6 +84,13 @@ const groupedMonthlyData = async (table1, table2, sorted = true)=>{
     } finally{
         console.log('done with the data function');
     }
-};
+} // const allOfTheData = async (table, table2) => {
+ //     const data1 = await getRunData(table)
+ //     const data2 = await getRunData(table2)
+ //     const data3 = [...data1, ...data2]
+ //     return data3
+ // }
+ // const storeData = allOfTheData(runTable, runTable2)
+;
 
 //# sourceMappingURL=monthly.16223c9f.js.map

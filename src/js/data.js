@@ -1,3 +1,6 @@
+const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data"
+const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data"
+
 // Fetch the data from the csv file
 const getRunData = async (url, offset) => {
     try {
@@ -14,7 +17,7 @@ const getRunData = async (url, offset) => {
 // this format was utilized by the example I worked from would like to improve with additional data
 // convert from km to miles
 // TODO: bring in other data for additional data sources
-const runDateValues = async (data) => data.map((dv) => {
+const runDateValues = async (data) =>  data.map((dv) => {
 
     return {
         date: d3.timeDay(new Date(dv['Activity Date'])),
@@ -44,16 +47,38 @@ const theData = async (table) => {
     }
 }
 
+const allOfTheData = async (table, table2) => {
+    const data1 = await getRunData(table)
+    const data2 = await getRunData(table2)
+    const data3 = [...data1, ...data2]
+    return data3
+}
+
+allOfTheData(runTable, runTable2)
+    .then((res) => res)
+    .then((data) => {
+        console.log('allOfTheData', data)
+        console.log(typeof(data))
+        const now = Date.now();
+        // data.updated = now;
+        data = [...data, now]
+        window.localStorage.setItem("runData", JSON.stringify(data));   
+})
+
 const groupedMonthlyData = async (table1, table2, sorted = true) => {
     try {
-        let beforeTime = Date.now()
-        const data = await getRunData(table1)
-        const data2 = await getRunData(table2)
-        let afterTime = Date.now()
-
-        const data3 = [...data, ...data2]
-        const dates = await runDateValues(data3)
-        console.log(dates)
+        // let storedData = localStorage.getItem('runData');
+        const storedData = false;
+        console.log(storedData)
+        if(storedData){
+            let array = JSON.parse(storedData);
+            var dates = await runDateValues(array)
+        } else {
+            const data = await getRunData(table1)
+            const data2 = await getRunData(table2)
+            const data3 = [...data, ...data2]
+            var dates = await runDateValues(data3)
+        }
 
         const datesInOrder = dates.sort((a,b) => {
             return a.date - b.date
@@ -77,7 +102,6 @@ const groupedMonthlyData = async (table1, table2, sorted = true) => {
             const sortedMonthTotal = monthTotals.sort((a, b) => {
                 return b.distance - a.distance
             })
-            console.log(sortedMonthTotal)        
             return sortedMonthTotal
         }
         console.log(monthTotals)
@@ -88,3 +112,4 @@ const groupedMonthlyData = async (table1, table2, sorted = true) => {
         console.log('done with the data function')
     }
 }
+
