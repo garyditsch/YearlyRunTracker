@@ -521,6 +521,7 @@ const parseWeeklyData = (data)=>{
     const months = data.reduce((acc, x)=>{
         //get date
         const date = new Date(x.date);
+        // console.log(date)
         //get week
         const week = _dateFns.getWeek(date, {
             weekStartsOn: 1
@@ -588,6 +589,18 @@ const getWeeklyData = async (runTable1, runTable21)=>{
     console.log(results);
     return results;
 };
+getWeeklyData(runTable, runTable2).then((response)=>{
+    const finalWeek = response[response.length - 1];
+    const idWeek = document.getElementById('theWeekId');
+    idWeek.innerHTML = finalWeek.week;
+    const runWeek = document.getElementById('theWeekRuns');
+    runWeek.innerHTML = finalWeek.numberOfRuns;
+    const distanceWeek = document.getElementById('theWeekDistance');
+    distanceWeek.innerHTML = finalWeek.weekDistance.toFixed(2);
+    const fortyFiveWeek = document.getElementById('theWeekFortyFive');
+    fortyFiveWeek.innerHTML = finalWeek.runsOverFortyFive;
+    console.log('final response', finalWeek);
+});
 getWeeklyData(runTable, runTable2).then((response)=>{
     const weeklyLabelsInChrono = response.map((x)=>{
         return x.week;
