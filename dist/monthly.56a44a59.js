@@ -514,10 +514,44 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"9mTWS":[function(require,module,exports) {
-const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data";
-const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
-const getMonthlyGroupedData = async (runTable1, runTable21, isSorted)=>{
-    const result = await groupedMonthlyData(runTable1, runTable21, isSorted);
+var _data = require("./modules/data");
+const groupedMonthlyData = async (sorted = true)=>{
+    try {
+        const dates = await _data.theData(_data.runTable, _data.runTable2);
+        console.log(typeof dates[0].date);
+        const months = d3.nest().key((d)=>new Date(d.date).toLocaleString('default', {
+                month: 'long',
+                year: 'numeric'
+            })
+        ).entries(dates);
+        console.log(months);
+        const monthTotals = months.map((month)=>{
+            const subTotal = month.values.reduce((total, num)=>{
+                return total + num.value;
+            }, 0);
+            return {
+                key: month.key,
+                distance: parseInt(subTotal),
+                runCount: month.values.length
+            };
+        });
+        if (sorted === true) {
+            const sortedMonthTotal = monthTotals.sort((a, b)=>{
+                return b.distance - a.distance;
+            });
+            // console.log(sortedMonthTotal)
+            return sortedMonthTotal;
+        }
+        // console.log(monthTotals)
+        return monthTotals;
+    } catch (err) {
+        console.log('the data function error', err);
+    } finally{
+        console.log('done with the data function');
+    }
+};
+const getMonthlyGroupedData = async (isSorted)=>{
+    const result = await groupedMonthlyData(isSorted);
     const monthValues = await result.map((x)=>{
         return x.distance;
     });
@@ -533,7 +567,7 @@ const getMonthlyGroupedData = async (runTable1, runTable21, isSorted)=>{
         'monthRunCount': monthRunCount
     };
 };
-getMonthlyGroupedData(runTable, runTable2, true).then((response)=>{
+getMonthlyGroupedData(true).then((response)=>{
     console.log(response.monthValues);
     const data = {
         labels: response.monthLabels,
@@ -560,7 +594,7 @@ getMonthlyGroupedData(runTable, runTable2, true).then((response)=>{
     const myChart = new Chart(document.getElementById('myChart'), config);
 }).catch((err)=>console.log(err)
 );
-getMonthlyGroupedData(runTable, runTable2, false).then((response)=>{
+getMonthlyGroupedData(false).then((response)=>{
     const data = {
         labels: response.monthLabels,
         datasets: [
@@ -586,7 +620,7 @@ getMonthlyGroupedData(runTable, runTable2, false).then((response)=>{
     const myChart = new Chart(document.getElementById('dateMonthlyChart'), config);
 }).catch((err)=>console.log(err)
 );
-getMonthlyGroupedData(runTable, runTable2, false).then((response)=>{
+getMonthlyGroupedData(false).then((response)=>{
     const data = {
         labels: response.monthLabels,
         datasets: [
@@ -612,7 +646,7 @@ getMonthlyGroupedData(runTable, runTable2, false).then((response)=>{
     const myChart = new Chart(document.getElementById('runCountDateMonthlyChart'), config);
 }).catch((err)=>console.log(err)
 );
-getMonthlyGroupedData(runTable, runTable2, true).then((response)=>{
+getMonthlyGroupedData(true).then((response)=>{
     const data = {
         labels: response.monthLabels,
         datasets: [
@@ -638,6 +672,128 @@ getMonthlyGroupedData(runTable, runTable2, true).then((response)=>{
     const myChart = new Chart(document.getElementById('runCountHighToLow'), config);
 }).catch((err)=>console.log(err)
 );
+
+},{"./modules/data":"jvSIA"}],"jvSIA":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getRunData", ()=>getRunData
+);
+parcelHelpers.export(exports, "runDateValues", ()=>runDateValues
+);
+parcelHelpers.export(exports, "theData", ()=>theData
+);
+parcelHelpers.export(exports, "runTable", ()=>runTable
+);
+parcelHelpers.export(exports, "runTable2", ()=>runTable2
+);
+const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data";
+const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
+// Fetch the data from the Airtable via Netlify function
+const getRunData = async (url)=>{
+    try {
+        const res = await fetch(url);
+        return res.json();
+    } catch (err) {
+        console.log('get data error', err);
+    } finally{
+        console.log('get data has finished');
+    }
+};
+// map over the data and return a new array with just the formatted date and distance of the commute
+// this format was utilized by the example I worked from would like to improve with additional data
+// convert from km to miles
+// TODO: bring in other data for additional data sources
+const runDateValues = async (data)=>data.map((dv)=>{
+        return {
+            date: d3.timeDay(new Date(dv['Activity Date'])),
+            value: Number(dv['Distance']) * 0.6213712,
+            minutesOfDayStart: (new Date(dv['Activity Date']).getHours() * 60 + new Date(dv['Activity Date']).getMinutes() - new Date(dv['Activity Date']).getTimezoneOffset()) / 60,
+            speed: 60 / (dv["Average Speed"] * 2.2369),
+            runDuration: dv['Elapsed Time'] / 60,
+            isFortyFive: 45 <= dv['Elapsed Time'] / 60,
+            dv: dv
+        };
+    })
+;
+const theData = async (table, table2)=>{
+    const thisWeek = new Date(Date.now());
+    const today = thisWeek.setHours(0, 0, 0, 0);
+    console.log(typeof today, 'today variable');
+    console.log(typeof JSON.parse(localStorage.getItem('updatedData')));
+    try {
+        if (localStorage.getItem("runData") === null) {
+            const data1 = await getRunData(table);
+            const data2 = await getRunData(table2);
+            console.log('hit the api endpoint');
+            const data3 = [
+                ...data1,
+                ...data2
+            ];
+            const dates = await runDateValues(data3);
+            const datesInOrder = dates.sort((a, b)=>{
+                return a.date - b.date;
+            });
+            localStorage.setItem("runData", JSON.stringify(datesInOrder));
+            localStorage.setItem("updatedData", JSON.stringify(today));
+            console.log('the api dates because of no storage', dates);
+            return dates;
+        } else if (today !== JSON.parse(localStorage.getItem('updatedData'))) {
+            const data1 = await getRunData(table);
+            const data2 = await getRunData(table2);
+            console.log('hit the api endpoint');
+            const data3 = [
+                ...data1,
+                ...data2
+            ];
+            const dates = await runDateValues(data3);
+            const datesInOrder = dates.sort((a, b)=>{
+                return a.date - b.date;
+            });
+            localStorage.setItem("runData", JSON.stringify(datesInOrder));
+            localStorage.setItem("updatedData", JSON.stringify(today));
+            console.log('the api dates becaue of past date', dates);
+            return dates;
+        } else {
+            const dates = JSON.parse(localStorage.getItem("runData"));
+            console.log('the local storage dates', dates);
+            return dates;
+        }
+    } catch (err) {
+        console.log('the data function error', err);
+    } finally{
+        console.log('done with the data function');
+    }
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, '__esModule', {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
 
 },{}]},["f67RO","9mTWS"], "9mTWS", "parcelRequire50e8")
 

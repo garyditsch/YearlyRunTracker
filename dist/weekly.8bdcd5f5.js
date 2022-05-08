@@ -1918,51 +1918,7 @@ var secondsInMinute = 60;
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "getRunData", ()=>getRunData
-) // const groupedMonthlyData = async (table1, table2, sorted = true) => {
- //     try {
- //         // let storedData = localStorage.getItem('runData');
- //         const storedData = false;
- //         console.log(storedData)
- //         if(storedData){
- //             let array = JSON.parse(storedData);
- //             var dates = await runDateValues(array)
- //         } else {
- //             const data = await getRunData(table1)
- //             const data2 = await getRunData(table2)
- //             const data3 = [...data, ...data2]
- //             var dates = await runDateValues(data3)
- //         }
- //         const datesInOrder = dates.sort((a,b) => {
- //             return a.date - b.date
- //         })
- //         const months = d3.nest()
- //             .key(d => d.date.toLocaleString('default', { month: 'long', year: 'numeric' }))
- //             .entries(datesInOrder)
- //         const monthTotals = months.map((month) => {
- //             const subTotal = month.values.reduce((total, num) => { 
- //                 return total + num.value              
- //             }, 0)
- //             return {
- //                 key: month.key,
- //                 distance: parseInt(subTotal),
- //                 runCount: month.values.length
- //             }
- //         })
- //         if( sorted === true){
- //             const sortedMonthTotal = monthTotals.sort((a, b) => {
- //                 return b.distance - a.distance
- //             })
- //             return sortedMonthTotal
- //         }
- //         console.log(monthTotals)
- //         return monthTotals        
- //     } catch (err) {
- //         console.log('the data function error', err)
- //     } finally {
- //         console.log('done with the data function')
- //     }
- // }
-;
+);
 parcelHelpers.export(exports, "runDateValues", ()=>runDateValues
 );
 parcelHelpers.export(exports, "theData", ()=>theData

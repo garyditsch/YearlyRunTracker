@@ -1,8 +1,45 @@
-const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data"
-const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data"
+import { theData, runTable, runTable2 } from './modules/data'
 
-const getMonthlyGroupedData = async (runTable, runTable2, isSorted) => {
-    const result = await groupedMonthlyData(runTable, runTable2, isSorted)
+const groupedMonthlyData = async (sorted = true) => {
+  try {
+      const dates = await theData(runTable, runTable2)
+
+      console.log(typeof(dates[0].date))
+
+      const months = d3.nest()
+          .key(d => new Date(d.date).toLocaleString('default', { month: 'long', year: 'numeric' }))
+          .entries(dates)
+
+      console.log(months)
+
+      const monthTotals = months.map((month) => {
+          const subTotal = month.values.reduce((total, num) => { 
+              return total + num.value              
+          }, 0)
+          return {
+              key: month.key,
+              distance: parseInt(subTotal),
+              runCount: month.values.length
+          }
+      })
+      if( sorted === true){
+          const sortedMonthTotal = monthTotals.sort((a, b) => {
+              return b.distance - a.distance
+          })
+          // console.log(sortedMonthTotal)
+          return sortedMonthTotal
+      }
+      // console.log(monthTotals)
+      return monthTotals        
+  } catch (err) {
+      console.log('the data function error', err)
+  } finally {
+      console.log('done with the data function')
+  }
+}
+
+const getMonthlyGroupedData = async (isSorted) => {
+    const result = await groupedMonthlyData(isSorted)
     const monthValues = await result.map((x) => {return x.distance})
     const monthLabels = await result.map((x) => {return x.key})
     const monthRunCount = await result.map((x) => {return x.runCount})
@@ -13,7 +50,7 @@ const getMonthlyGroupedData = async (runTable, runTable2, isSorted) => {
     }
 }
 
-getMonthlyGroupedData(runTable, runTable2, true)
+getMonthlyGroupedData(true)
     .then(response => {
         console.log(response.monthValues)
         const data = {
@@ -43,7 +80,7 @@ getMonthlyGroupedData(runTable, runTable2, true)
     })
     .catch(err => console.log(err))
 
-getMonthlyGroupedData(runTable, runTable2, false)
+getMonthlyGroupedData(false)
     .then(response => {
         const data = {
             labels: response.monthLabels,
@@ -72,7 +109,7 @@ getMonthlyGroupedData(runTable, runTable2, false)
     })
     .catch(err => console.log(err))
 
-getMonthlyGroupedData(runTable, runTable2, false)
+getMonthlyGroupedData(false)
     .then(response => {
         const data = {
             labels: response.monthLabels,
@@ -101,7 +138,7 @@ getMonthlyGroupedData(runTable, runTable2, false)
     })
     .catch(err => console.log(err))
 
-getMonthlyGroupedData(runTable, runTable2, true)
+getMonthlyGroupedData(true)
     .then(response => {
         const data = {
             labels: response.monthLabels,

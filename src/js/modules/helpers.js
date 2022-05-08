@@ -1,7 +1,5 @@
 import { calendar } from "./calendar.js"
 
-// const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data"
-
 const drawCalendar2019 = () =>{
     const svg = d3.select("#calendar_svg_2019")
 
