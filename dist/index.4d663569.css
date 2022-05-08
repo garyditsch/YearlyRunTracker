@@ -4,14 +4,19 @@
 
 h1 {
   color: #09468b;
-  text-align: center;
   margin: 0;
 }
 
 h3 {
   color: #09468b;
-  text-align: center;
-  margin: 0 0 1rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+.thisWeek {
+  color: #09468b;
+  font-style: italic;
+  font-weight: 700;
 }
 
 /*# sourceMappingURL=index.4d663569.css.map */

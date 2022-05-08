@@ -130,70 +130,95 @@ getWeeklyData()
             lastEightWeeks.push(thisWeekData)
         }
 
-        const margin = {top: 30, right: 30, bottom: 70, left: 60}
-        const width = 1200 - margin.left - margin.right
-        const height = 400 - margin.top - margin.bottom
+        const margin = { top: 30, right: 30, bottom: 70, left: 100 };
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+        console.log(year);
 
         // append the svg object to the body of the page
-        const svg = d3.select("#fortyfive_bar")
+        const svg = d3
+            .select("#fortyfive_bar")
             .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
             .append("g")
-                .attr("transform",
-                    "translate(" + margin.left + "," + margin.top + ")");
-
-        // X axis
-        const x = d3.scaleBand()
-            .range([ 0, width ])
-            .domain(lastEightWeeks.map(function(d) { return d.week; }))
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        // y axis range
+        let yScale = d3
+            .scaleBand()
+            .range([height, 0])
             .padding(0.2);
         
-        svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x))
-            .selectAll("text")
-                .attr("transform", "translate(25,0)rotate(0)")
-                .attr("font-size", "1rem")
-                .style("text-anchor", "end");
+        // set y axis range to data
+        yScale
+            .domain(
+            lastEightWeeks.map(function (d) {
+                return d.week;
+            })
+            )
 
-        // Add Y axis
-        let yScale = d3.scaleLinear()
-            .domain([0, 7])
-            .range([ height, 0])
-
-        let xAxisGenerator = d3.axisLeft(yScale).ticks(7);
+        // X axis
+        let xScale = d3
+            .scaleLinear()
+            .range([0, width])
         
-        svg.append("g")
-            .call(xAxisGenerator)
-            .selectAll("text")
-                .attr("font-size", "1rem")
-
+        // set x axis range to data
+        xScale
+            .domain([0,7])
+        
         // Bars
-        svg.selectAll("mybar")
+        
+        svg
+            .selectAll('mybars')
             .data(lastEightWeeks)
             .enter()
-            .append("rect")
-                .attr("x", function(d) { return x(d.week); })
-                .attr("y", function(d) { return yScale(d.runsOverFortyFive); })
-                .attr("width", x.bandwidth())
-                .attr("height", function(d) { return height - yScale(d.runsOverFortyFive); })
-                .attr("fill", function(d) { 
-                    if(d.week === year){
-                        return "#09468B"
-                    } else if (d.runsOverFortyFive > 3){
-                        return "#ACAD94"
-                    } else {
-                        return "#D8D4D5"
-                    }
-                })
+            .append('rect')
+            .attr('x', 0)
+            .attr('y', function (d) {
+            return yScale(d.week)
+            })
+            .attr('width', function (d) {
+            return xScale(d.runsOverFortyFive)
+            })
+            .attr('height', yScale.bandwidth())
+            .attr("fill", function (d) {
+                if (d.week === year) {
+                return "#09468B";
+                } else if (d.runsOverFortyFive > 3) {
+                return "#ACAD94";
+                } else {
+                return "#D8D4D5";
+                }
+            })
+        
+        svg
+            .append('line')
+            .style('stroke', '#ACAD94')
+            .style('stroke-width', 1)
+            .attr('x1', 383)
+            .attr('x2', 383)
+            .attr('y1', 0)
+            .attr('y2', 300) 
+        
+        let xAxisGenerator = d3.axisBottom(xScale).ticks(7)
+        
+        svg
+            .append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxisGenerator)
+            .selectAll("text")
+            .attr("transform", "translate(3,0)rotate(0)")
+            .attr("font-size", "0.8rem")
+            .style("text-anchor", "end");
 
-        svg.append("g")
-            .text('This is my title')
-            .attr("font-size", "2rem")
+        let yAxisGenerator = d3.axisLeft(yScale).ticks(7);
 
-
-        console.log('final 8', lastEightWeeks)
+        svg
+            .append("g")
+            .call(yAxisGenerator)
+            .selectAll("text")
+            .attr("font-size", "0.8rem");
 })
 
 
