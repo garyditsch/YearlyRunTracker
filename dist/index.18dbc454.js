@@ -869,7 +869,7 @@ parcelHelpers.export(exports, "drawCalendar2018", ()=>drawCalendar2018
 parcelHelpers.export(exports, "drawCalendar2017", ()=>drawCalendar2017
 );
 var _calendarJs = require("./calendar.js");
-const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
+// const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data"
 const drawCalendar2019 = ()=>{
     const svg = d3.select("#calendar_svg_2019");
     _calendarJs.calendar(theData, runTable2, svg, {

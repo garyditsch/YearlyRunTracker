@@ -1,7 +1,7 @@
 const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data";
 const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
-// Fetch the data from the csv file
-const getRunData = async (url, offset)=>{
+// Fetch the data from the Airtable via Netlify function
+const getRunData = async (url)=>{
     try {
         const res = await fetch(url);
         return res.json();
@@ -27,88 +27,71 @@ const runDateValues = async (data)=>data.map((dv)=>{
         };
     })
 ;
-const theData = async (table)=>{
+const theData = async (table, table2)=>{
     try {
-        let beforeTime = Date.now();
-        const data = await getRunData(table);
-        let afterTime = Date.now();
-        const dates = await runDateValues(data);
-        return dates;
-    } catch (err) {
-        console.log('the data function error', err);
-    } finally{
-        console.log('done with the data function');
-    }
-};
-const allOfTheData = async (table, table2)=>{
-    const data1 = await getRunData(table);
-    const data2 = await getRunData(table2);
-    const data3 = [
-        ...data1,
-        ...data2
-    ];
-    return data3;
-};
-allOfTheData(runTable, runTable2).then((res)=>res
-).then((data)=>{
-    console.log('allOfTheData', data);
-    console.log(typeof data);
-    const now = Date.now();
-    // data.updated = now;
-    data = [
-        ...data,
-        now
-    ];
-    window.localStorage.setItem("runData", JSON.stringify(data));
-});
-const groupedMonthlyData = async (table1, table2, sorted = true)=>{
-    try {
-        // let storedData = localStorage.getItem('runData');
-        const storedData = false;
-        console.log(storedData);
-        if (storedData) {
-            let array = JSON.parse(storedData);
-            var dates = await runDateValues(array);
-        } else {
-            const data = await getRunData(table1);
+        if (localStorage.getItem("runData") === null) {
+            const data1 = await getRunData(table);
             const data2 = await getRunData(table2);
             const data3 = [
-                ...data,
+                ...data1,
                 ...data2
             ];
-            var dates = await runDateValues(data3);
+            const dates = await runDateValues(data3);
+            localStorage.setItem("runData", dates);
+            return dates;
+        } else {
+            const dates = localStorage.getItem("runData");
+            return dates;
         }
-        const datesInOrder = dates.sort((a, b)=>{
-            return a.date - b.date;
-        });
-        const months = d3.nest().key((d)=>d.date.toLocaleString('default', {
-                month: 'long',
-                year: 'numeric'
-            })
-        ).entries(datesInOrder);
-        const monthTotals = months.map((month)=>{
-            const subTotal = month.values.reduce((total, num)=>{
-                return total + num.value;
-            }, 0);
-            return {
-                key: month.key,
-                distance: parseInt(subTotal),
-                runCount: month.values.length
-            };
-        });
-        if (sorted === true) {
-            const sortedMonthTotal = monthTotals.sort((a, b)=>{
-                return b.distance - a.distance;
-            });
-            return sortedMonthTotal;
-        }
-        console.log(monthTotals);
-        return monthTotals;
     } catch (err) {
         console.log('the data function error', err);
     } finally{
         console.log('done with the data function');
     }
-};
+} // const groupedMonthlyData = async (table1, table2, sorted = true) => {
+ //     try {
+ //         // let storedData = localStorage.getItem('runData');
+ //         const storedData = false;
+ //         console.log(storedData)
+ //         if(storedData){
+ //             let array = JSON.parse(storedData);
+ //             var dates = await runDateValues(array)
+ //         } else {
+ //             const data = await getRunData(table1)
+ //             const data2 = await getRunData(table2)
+ //             const data3 = [...data, ...data2]
+ //             var dates = await runDateValues(data3)
+ //         }
+ //         const datesInOrder = dates.sort((a,b) => {
+ //             return a.date - b.date
+ //         })
+ //         const months = d3.nest()
+ //             .key(d => d.date.toLocaleString('default', { month: 'long', year: 'numeric' }))
+ //             .entries(datesInOrder)
+ //         const monthTotals = months.map((month) => {
+ //             const subTotal = month.values.reduce((total, num) => { 
+ //                 return total + num.value              
+ //             }, 0)
+ //             return {
+ //                 key: month.key,
+ //                 distance: parseInt(subTotal),
+ //                 runCount: month.values.length
+ //             }
+ //         })
+ //         if( sorted === true){
+ //             const sortedMonthTotal = monthTotals.sort((a, b) => {
+ //                 return b.distance - a.distance
+ //             })
+ //             return sortedMonthTotal
+ //         }
+ //         console.log(monthTotals)
+ //         return monthTotals        
+ //     } catch (err) {
+ //         console.log('the data function error', err)
+ //     } finally {
+ //         console.log('done with the data function')
+ //     }
+ // }
+;
 
 //# sourceMappingURL=index.16223c9f.js.map

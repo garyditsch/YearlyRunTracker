@@ -515,23 +515,27 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"dedVu":[function(require,module,exports) {
 var _dateFns = require("date-fns");
-const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data";
-const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
+var _data = require("./modules/data");
+const thisWeek = new Date(Date.now());
+const week = _dateFns.getWeek(thisWeek, {
+    weekStartsOn: 1
+});
+const year = `${thisWeek.getFullYear()}-${week}`;
 const parseWeeklyData = (data)=>{
     const months = data.reduce((acc, x)=>{
         //get date
         const date = new Date(x.date);
         // console.log(date)
         //get week
-        const week = _dateFns.getWeek(date, {
+        const week1 = _dateFns.getWeek(date, {
             weekStartsOn: 1
         });
         //create key
-        const year = `${date.getFullYear()}-${week}`;
+        const year1 = `${date.getFullYear()}-${week1}`;
         //add key as property to return object
-        if (!acc[year]) acc[year] = [];
+        if (!acc[year1]) acc[year1] = [];
         // push current data onto array
-        acc[year].push(x);
+        acc[year1].push(x);
         return acc;
     }, {});
     return months;
@@ -571,44 +575,102 @@ const getWeeklyStats = (data)=>{
     });
     return result;
 };
-const getWeeklyData = async (runTable1, runTable21)=>{
-    const data = await getRunData(runTable1);
-    const data2 = await getRunData(runTable21);
-    let afterTime = Date.now();
-    const data3 = [
-        ...data,
-        ...data2
-    ];
-    const dates = await runDateValues(data3);
-    const datesInOrder = dates.sort((a, b)=>{
-        return a.date - b.date;
-    });
-    const weeks = await parseWeeklyData(datesInOrder);
+const getWeeklyData = async ()=>{
+    const dates = await _data.theData(_data.runTable, _data.runTable2);
+    const weeks = await parseWeeklyData(dates);
     const entries = Object.entries(weeks);
     const results = getWeeklyStats(entries);
     console.log(results);
     return results;
 };
-getWeeklyData(runTable, runTable2).then((response)=>{
+getWeeklyData().then((response)=>{
     const finalWeek = response[response.length - 1];
-    const idWeek = document.getElementById('theWeekId');
-    idWeek.innerHTML = finalWeek.week;
-    const runWeek = document.getElementById('theWeekRuns');
-    runWeek.innerHTML = finalWeek.numberOfRuns;
-    const distanceWeek = document.getElementById('theWeekDistance');
-    distanceWeek.innerHTML = finalWeek.weekDistance.toFixed(2);
-    const fortyFiveWeek = document.getElementById('theWeekFortyFive');
-    fortyFiveWeek.innerHTML = finalWeek.runsOverFortyFive;
     console.log('final response', finalWeek);
+    if (finalWeek.week === year) {
+        const idWeek = document.getElementById('theWeekId');
+        idWeek.innerHTML = finalWeek.week;
+        const runWeek = document.getElementById('theWeekRuns');
+        runWeek.innerHTML = finalWeek.numberOfRuns;
+        const distanceWeek = document.getElementById('theWeekDistance');
+        distanceWeek.innerHTML = finalWeek.weekDistance.toFixed(2);
+        const fortyFiveWeek = document.getElementById('theWeekFortyFive');
+        fortyFiveWeek.innerHTML = finalWeek.runsOverFortyFive;
+    } else {
+        const idWeek = document.getElementById('theWeekId');
+        idWeek.innerHTML = year;
+        const runWeek = document.getElementById('theWeekRuns');
+        runWeek.innerHTML = '0';
+        const distanceWeek = document.getElementById('theWeekDistance');
+        distanceWeek.innerHTML = '0';
+        const fortyFiveWeek = document.getElementById('theWeekFortyFive');
+        fortyFiveWeek.innerHTML = '0';
+    }
 });
-getWeeklyData(runTable, runTable2).then((response)=>{
+getWeeklyData().then((response)=>{
+    const lastWeek = response[response.length - 1];
+    if (lastWeek.week === year) var lastEightWeeks = response.slice(response.length - 8);
+    else {
+        const thisWeekData = {
+            firstRunDate: 'none',
+            fortyFiveSuccess: false,
+            runsOverFortyFive: 0,
+            week: year,
+            weekDistance: 0,
+            weekDuration: 0
+        };
+        var lastEightWeeks = response.slice(response.length - 7);
+        lastEightWeeks.push(thisWeekData);
+    }
+    const margin = {
+        top: 30,
+        right: 30,
+        bottom: 70,
+        left: 60
+    };
+    const width = 1200 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+    // append the svg object to the body of the page
+    const svg = d3.select("#fortyfive_bar").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    // X axis
+    const x = d3.scaleBand().range([
+        0,
+        width
+    ]).domain(lastEightWeeks.map(function(d) {
+        return d.week;
+    })).padding(0.2);
+    svg.append("g").attr("transform", "translate(0," + height + ")").call(d3.axisBottom(x)).selectAll("text").attr("transform", "translate(25,0)rotate(0)").attr("font-size", "1rem").style("text-anchor", "end");
+    // Add Y axis
+    let yScale = d3.scaleLinear().domain([
+        0,
+        7
+    ]).range([
+        height,
+        0
+    ]);
+    let xAxisGenerator = d3.axisLeft(yScale).ticks(7);
+    svg.append("g").call(xAxisGenerator).selectAll("text").attr("font-size", "1rem");
+    // Bars
+    svg.selectAll("mybar").data(lastEightWeeks).enter().append("rect").attr("x", function(d) {
+        return x(d.week);
+    }).attr("y", function(d) {
+        return yScale(d.runsOverFortyFive);
+    }).attr("width", x.bandwidth()).attr("height", function(d) {
+        return height - yScale(d.runsOverFortyFive);
+    }).attr("fill", function(d) {
+        if (d.week === year) return "#09468B";
+        else if (d.runsOverFortyFive > 3) return "#ACAD94";
+        else return "#D8D4D5";
+    });
+    svg.append("g").text('This is my title').attr("font-size", "2rem");
+    console.log('final 8', lastEightWeeks);
+});
+getWeeklyData().then((response)=>{
     const weeklyLabelsInChrono = response.map((x)=>{
         return x.week;
     });
     const weeklyDistanceArray = response.map((x)=>{
         return parseFloat(x.weekDistance.toFixed(2));
     });
-    // console.log(weeklyDistanceArray)
     const data = {
         labels: weeklyLabelsInChrono,
         datasets: [
@@ -634,7 +696,7 @@ getWeeklyData(runTable, runTable2).then((response)=>{
     const myWeeklyChart = new Chart(document.getElementById('myWeeklyChart'), config);
 }).catch((err)=>console.log(err)
 );
-getWeeklyData(runTable, runTable2).then((response)=>{
+getWeeklyData().then((response)=>{
     const weeklyLabelsInChrono = response.map((x)=>{
         return x.week;
     });
@@ -678,7 +740,7 @@ getWeeklyData(runTable, runTable2).then((response)=>{
 }).catch((err)=>console.log(err)
 );
 
-},{"date-fns":"9yHCA"}],"9yHCA":[function(require,module,exports) {
+},{"date-fns":"9yHCA","./modules/data":"jvSIA"}],"9yHCA":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 // This file is generated automatically by `scripts/build/indices.js`. Please, don't change it.
@@ -1848,6 +1910,142 @@ var monthsInYear = 12;
 var quartersInYear = 4;
 var secondsInHour = 3600;
 var secondsInMinute = 60;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"jvSIA":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getRunData", ()=>getRunData
+) // const groupedMonthlyData = async (table1, table2, sorted = true) => {
+ //     try {
+ //         // let storedData = localStorage.getItem('runData');
+ //         const storedData = false;
+ //         console.log(storedData)
+ //         if(storedData){
+ //             let array = JSON.parse(storedData);
+ //             var dates = await runDateValues(array)
+ //         } else {
+ //             const data = await getRunData(table1)
+ //             const data2 = await getRunData(table2)
+ //             const data3 = [...data, ...data2]
+ //             var dates = await runDateValues(data3)
+ //         }
+ //         const datesInOrder = dates.sort((a,b) => {
+ //             return a.date - b.date
+ //         })
+ //         const months = d3.nest()
+ //             .key(d => d.date.toLocaleString('default', { month: 'long', year: 'numeric' }))
+ //             .entries(datesInOrder)
+ //         const monthTotals = months.map((month) => {
+ //             const subTotal = month.values.reduce((total, num) => { 
+ //                 return total + num.value              
+ //             }, 0)
+ //             return {
+ //                 key: month.key,
+ //                 distance: parseInt(subTotal),
+ //                 runCount: month.values.length
+ //             }
+ //         })
+ //         if( sorted === true){
+ //             const sortedMonthTotal = monthTotals.sort((a, b) => {
+ //                 return b.distance - a.distance
+ //             })
+ //             return sortedMonthTotal
+ //         }
+ //         console.log(monthTotals)
+ //         return monthTotals        
+ //     } catch (err) {
+ //         console.log('the data function error', err)
+ //     } finally {
+ //         console.log('done with the data function')
+ //     }
+ // }
+;
+parcelHelpers.export(exports, "runDateValues", ()=>runDateValues
+);
+parcelHelpers.export(exports, "theData", ()=>theData
+);
+parcelHelpers.export(exports, "runTable", ()=>runTable
+);
+parcelHelpers.export(exports, "runTable2", ()=>runTable2
+);
+const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data";
+const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data";
+// Fetch the data from the Airtable via Netlify function
+const getRunData = async (url)=>{
+    try {
+        const res = await fetch(url);
+        return res.json();
+    } catch (err) {
+        console.log('get data error', err);
+    } finally{
+        console.log('get data has finished');
+    }
+};
+// map over the data and return a new array with just the formatted date and distance of the commute
+// this format was utilized by the example I worked from would like to improve with additional data
+// convert from km to miles
+// TODO: bring in other data for additional data sources
+const runDateValues = async (data)=>data.map((dv)=>{
+        return {
+            date: d3.timeDay(new Date(dv['Activity Date'])),
+            value: Number(dv['Distance']) * 0.6213712,
+            minutesOfDayStart: (new Date(dv['Activity Date']).getHours() * 60 + new Date(dv['Activity Date']).getMinutes() - new Date(dv['Activity Date']).getTimezoneOffset()) / 60,
+            speed: 60 / (dv["Average Speed"] * 2.2369),
+            runDuration: dv['Elapsed Time'] / 60,
+            isFortyFive: 45 <= dv['Elapsed Time'] / 60,
+            dv: dv
+        };
+    })
+;
+const theData = async (table, table2)=>{
+    const thisWeek = new Date(Date.now());
+    const today = thisWeek.setHours(0, 0, 0, 0);
+    console.log(typeof today, 'today variable');
+    console.log(typeof JSON.parse(localStorage.getItem('updatedData')));
+    try {
+        if (localStorage.getItem("runData") === null) {
+            const data1 = await getRunData(table);
+            const data2 = await getRunData(table2);
+            console.log('hit the api endpoint');
+            const data3 = [
+                ...data1,
+                ...data2
+            ];
+            const dates = await runDateValues(data3);
+            const datesInOrder = dates.sort((a, b)=>{
+                return a.date - b.date;
+            });
+            localStorage.setItem("runData", JSON.stringify(datesInOrder));
+            localStorage.setItem("updatedData", JSON.stringify(today));
+            console.log('the api dates because of no storage', dates);
+            return dates;
+        } else if (today !== JSON.parse(localStorage.getItem('updatedData'))) {
+            const data1 = await getRunData(table);
+            const data2 = await getRunData(table2);
+            console.log('hit the api endpoint');
+            const data3 = [
+                ...data1,
+                ...data2
+            ];
+            const dates = await runDateValues(data3);
+            const datesInOrder = dates.sort((a, b)=>{
+                return a.date - b.date;
+            });
+            localStorage.setItem("runData", JSON.stringify(datesInOrder));
+            localStorage.setItem("updatedData", JSON.stringify(today));
+            console.log('the api dates becaue of past date', dates);
+            return dates;
+        } else {
+            const dates = JSON.parse(localStorage.getItem("runData"));
+            console.log('the local storage dates', dates);
+            return dates;
+        }
+    } catch (err) {
+        console.log('the data function error', err);
+    } finally{
+        console.log('done with the data function');
+    }
+};
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["b32iK","dedVu"], "dedVu", "parcelRequire50e8")
 

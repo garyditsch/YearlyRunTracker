@@ -1,7 +1,9 @@
 import { getWeek } from 'date-fns'
+import { theData, runTable, runTable2 } from './modules/data'
 
-const runTable = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-run-data"
-const runTable2 = "https://quizzical-tereshkova-82c9ca.netlify.app/api/get-past-run-data"
+const thisWeek = new Date(Date.now())        
+const week = getWeek(thisWeek, {weekStartsOn: 1})
+const year = `${thisWeek.getFullYear()}-${week}`
 
 const parseWeeklyData = (data) => {
     const months = data.reduce((acc, x) => {
@@ -71,19 +73,10 @@ const getWeeklyStats = (data) => {
     return result
 }
 
-const getWeeklyData = async (runTable, runTable2) => {
-    const data = await getRunData(runTable)
-    const data2 = await getRunData(runTable2)
-    let afterTime = Date.now()
+const getWeeklyData = async () => {
+    const dates = await theData(runTable, runTable2)
 
-    const data3 = [...data, ...data2]
-    const dates = await runDateValues(data3)
-
-    const datesInOrder = dates.sort((a,b) => {
-        return a.date - b.date
-    })
-
-    const weeks = await parseWeeklyData(datesInOrder)
+    const weeks = await parseWeeklyData(dates)
     const entries = Object.entries(weeks);
     
     const results = getWeeklyStats(entries)
@@ -91,27 +84,124 @@ const getWeeklyData = async (runTable, runTable2) => {
     return results
 }
 
-getWeeklyData(runTable, runTable2)
+getWeeklyData()
     .then(response => {
         const finalWeek = response[response.length -1]
-
-        const idWeek = document.getElementById('theWeekId')
-        idWeek.innerHTML = finalWeek.week
-        const runWeek = document.getElementById('theWeekRuns')
-        runWeek.innerHTML = finalWeek.numberOfRuns
-        const distanceWeek = document.getElementById('theWeekDistance')
-        distanceWeek.innerHTML = finalWeek.weekDistance.toFixed(2)
-        const fortyFiveWeek = document.getElementById('theWeekFortyFive')
-        fortyFiveWeek.innerHTML = finalWeek.runsOverFortyFive
         console.log('final response', finalWeek)
+
+        if(finalWeek.week === year){
+            const idWeek = document.getElementById('theWeekId')
+            idWeek.innerHTML = finalWeek.week
+            const runWeek = document.getElementById('theWeekRuns')
+            runWeek.innerHTML = finalWeek.numberOfRuns
+            const distanceWeek = document.getElementById('theWeekDistance')
+            distanceWeek.innerHTML = finalWeek.weekDistance.toFixed(2)
+            const fortyFiveWeek = document.getElementById('theWeekFortyFive')
+            fortyFiveWeek.innerHTML = finalWeek.runsOverFortyFive
+        } else {
+            const idWeek = document.getElementById('theWeekId')
+            idWeek.innerHTML = year
+            const runWeek = document.getElementById('theWeekRuns')
+            runWeek.innerHTML = '0'
+            const distanceWeek = document.getElementById('theWeekDistance')
+            distanceWeek.innerHTML = '0'
+            const fortyFiveWeek = document.getElementById('theWeekFortyFive')
+            fortyFiveWeek.innerHTML = '0'
+        }
     })
 
+getWeeklyData()
+    .then(response => {
+        const lastWeek = response[response.length - 1]
 
-getWeeklyData(runTable, runTable2)
+        if(lastWeek.week === year){
+            var lastEightWeeks = response.slice((response.length - 8))
+        } else {
+            const thisWeekData = {
+                firstRunDate: 'none',
+                fortyFiveSuccess: false,
+                runsOverFortyFive: 0,
+                week: year,
+                weekDistance: 0,
+                weekDuration: 0
+            }
+
+            var lastEightWeeks = response.slice((response.length - 7))
+            lastEightWeeks.push(thisWeekData)
+        }
+
+        const margin = {top: 30, right: 30, bottom: 70, left: 60}
+        const width = 1200 - margin.left - margin.right
+        const height = 400 - margin.top - margin.bottom
+
+        // append the svg object to the body of the page
+        const svg = d3.select("#fortyfive_bar")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")");
+
+        // X axis
+        const x = d3.scaleBand()
+            .range([ 0, width ])
+            .domain(lastEightWeeks.map(function(d) { return d.week; }))
+            .padding(0.2);
+        
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+                .attr("transform", "translate(25,0)rotate(0)")
+                .attr("font-size", "1rem")
+                .style("text-anchor", "end");
+
+        // Add Y axis
+        let yScale = d3.scaleLinear()
+            .domain([0, 7])
+            .range([ height, 0])
+
+        let xAxisGenerator = d3.axisLeft(yScale).ticks(7);
+        
+        svg.append("g")
+            .call(xAxisGenerator)
+            .selectAll("text")
+                .attr("font-size", "1rem")
+
+        // Bars
+        svg.selectAll("mybar")
+            .data(lastEightWeeks)
+            .enter()
+            .append("rect")
+                .attr("x", function(d) { return x(d.week); })
+                .attr("y", function(d) { return yScale(d.runsOverFortyFive); })
+                .attr("width", x.bandwidth())
+                .attr("height", function(d) { return height - yScale(d.runsOverFortyFive); })
+                .attr("fill", function(d) { 
+                    if(d.week === year){
+                        return "#09468B"
+                    } else if (d.runsOverFortyFive > 3){
+                        return "#ACAD94"
+                    } else {
+                        return "#D8D4D5"
+                    }
+                })
+
+        svg.append("g")
+            .text('This is my title')
+            .attr("font-size", "2rem")
+
+
+        console.log('final 8', lastEightWeeks)
+})
+
+
+getWeeklyData()
     .then(response => {
         const weeklyLabelsInChrono = response.map((x) => {return x.week})
         const weeklyDistanceArray = response.map((x) => {return parseFloat(x.weekDistance.toFixed(2))})
-        // console.log(weeklyDistanceArray)
+
         const data = {
             labels: weeklyLabelsInChrono,
             datasets: [{
@@ -139,7 +229,7 @@ getWeeklyData(runTable, runTable2)
     })
     .catch(err => console.log(err))
 
-getWeeklyData(runTable, runTable2)
+getWeeklyData()
     .then(response => {
         const weeklyLabelsInChrono = response.map((x) => {return x.week})
         const weeklyFortyFiveArray = response.map((x) => {return x.runsOverFortyFive})
