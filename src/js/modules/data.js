@@ -18,8 +18,16 @@ const getRunData = async (url) => {
 // convert from km to miles
 // TODO: bring in other data for additional data sources
 const runDateValues = async (data) =>  data.map((dv) => {
+    let date = new Date(dv['Activity Date'])
+    let start = new Date(date.getFullYear(), 0, 0)
+    let diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 100)
+    let oneDay = 1000 * 60 * 60 * 24
+    let day = Math.floor(diff / oneDay)
+    let year = date.getFullYear()
 
     return {
+        dayOfYear: day,
+        year: year,
         date: d3.timeDay(new Date(dv['Activity Date'])),
         value: (Number(dv['Distance']) * 0.6213712),
         minutesOfDayStart: (((new Date(dv['Activity Date']).getHours() * 60) + (new Date(dv['Activity Date']).getMinutes()) - new Date(dv['Activity Date']).getTimezoneOffset()) / 60 ),

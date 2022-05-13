@@ -1,4 +1,4 @@
-async function calendar(theData, table, svg, ...Args){
+async function calendar(theData, table, table2, svg, ...Args){
 
     const startDate = new Date(Args[0].startDate).getTime()
     const endDate = new Date(Args[0].endDate).getTime()
@@ -8,7 +8,7 @@ async function calendar(theData, table, svg, ...Args){
     let ed = new Date(endDate).getTime()
     let sd = new Date(startDate).getTime()
 
-    let allMyDates = await theData(table)
+    let allMyDates = await theData(table, table2)
     console.log(allMyDates)
 
     let dates = allMyDates.filter(d => {
@@ -16,17 +16,22 @@ async function calendar(theData, table, svg, ...Args){
         return (sd < time && time < ed);
     });
 
+    console.log(dates)
+
     const yearTotal = dates.reduce((runTotal, run) => {
         const total = runTotal + run.value
         return total;
     }, 0)
 
+    console.log(yearTotal)
+
     const yearData = {
         'total': yearTotal.toFixed(0), 
-        'calYear': dates[0].date.getFullYear(), 
+        'calYear': new Date(dates[0].date).getFullYear(), 
         'noRuns': dates.length
     }
 
+    console.log(yearData)
     // function to return week label
     const formatDay = d =>
         ["Sun", "", "Tue", "", "Thu", "", "Sat"][d.getUTCDay()];
@@ -40,27 +45,32 @@ async function calendar(theData, table, svg, ...Args){
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString
     const reducedDates = dates.reduce(function (allDates, date) {
         if (allDates.some(function (e) {
-            return e.date.toLocaleString('en-US') === date.date.toLocaleString('en-US')
+            return new Date(e.date).toLocaleString('en-US') === new Date(date.date).toLocaleString('en-US')
         })) {
             allDates.filter(function (e) {
-                return e.date.toLocaleString('en-US') === date.date.toLocaleString('en-US')
+                return new Date(e.date).toLocaleString('en-US') === new Date(date.date).toLocaleString('en-US')
             })[0].value += +date.value
         } else {
             allDates.push({
-                date: date.date,
+                date: new Date(date.date),
                 value: +date.value
             })
         }
         return allDates
     }, []);
 
+    console.log(reducedDates)
 
     // return array with months grouped together. NOTE: nest is deprecated in future d3 versions
     const months = d3.nest()
-        .key(d => d.date.toLocaleString('default', { month: 'short' }))
+        .key(d => new Date(d.date).toLocaleString('default', { month: 'short' }))
         .entries(reducedDates)
 
+    console.log(months)
+
     months.sort((a, b) => (a.values[0].date > b.values[0].date ) ? 1 : ((b.values[0].date > a.values[0].date) ? -1 : 0))
+
+    console.log(months)
 
     const month_totals = months.map((month) => {
         if (month.key === 'Jan'){
@@ -118,6 +128,7 @@ async function calendar(theData, table, svg, ...Args){
         }
     })
 
+    console.log(month_totals)
     // get array of all values
     const values = reducedDates.map(c => c.value);
 
