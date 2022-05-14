@@ -19,3 +19,20 @@ h3 {
     font-weight: 700;
     font-style: italic;
   }
+
+  .progressDiv1 {
+      width: 80vw;
+      margin: 1rem 0rem;
+  }
+
+  .progressDiv2 {
+    width: 80vw
+}
+
+.progressBar2 {
+    width: 100%;
+}
+
+.progressBar1 {
+    width: 100%;
+}
